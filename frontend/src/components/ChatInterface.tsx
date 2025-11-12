@@ -2,7 +2,7 @@
 
 import React, {useState, useEffect, useRef} from 'react';
 import ChatMessage from './ChatMessage';
-import {sendMessage, getChatHistory} from '@/lib/api';
+import {sendMessage, getChatHistory, deleteChatHistory} from '@/lib/api';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -21,6 +21,7 @@ const ChatInterface: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [retryMessage, setRetryMessage] = useState<{ question: string, country?: string } | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const recognitionRef = useRef<any>(null);
@@ -163,7 +164,7 @@ const ChatInterface: React.FC = () => {
         }
     };
 
-    const handleExportChat = () => {
+    const handleExportChat = async () => {
         try {
             if (messages.length === 0) {
                 setError('No messages to export');
@@ -187,6 +188,8 @@ const ChatInterface: React.FC = () => {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            setSuccessMessage('Chat exported successfully!');
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (error) {
             console.error('Export error:', error);
             setError('Failed to export chat. Please try again.');
@@ -194,11 +197,20 @@ const ChatInterface: React.FC = () => {
         }
     };
 
-    const handleClearChat = () => {
-        if (confirm('Are you sure you want to clear the chat? This will only clear the display, not delete your history.')) {
-            setMessages([]);
-            setError(null);
-            setRetryMessage(null);
+    const handleClearChat = async () => {
+        if (confirm('Are you sure you want to clear the chat? This will delete your chat history.')) {
+            try {
+                await deleteChatHistory();
+                setMessages([]);
+                setError(null);
+                setRetryMessage(null);
+                setSuccessMessage('Chat cleared successfully!');
+                setTimeout(() => setSuccessMessage(null), 3000);
+            } catch (error) {
+                console.error('Failed to clear chat:', error);
+                setError('Failed to clear chat. Please try again.');
+                setTimeout(() => setError(null), 3000);
+            }
         }
     };
 
@@ -388,6 +400,35 @@ const ChatInterface: React.FC = () => {
                             <button
                                 onClick={() => setError(null)}
                                 className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                          d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Banner */}
+            {successMessage && (
+                <div
+                    className="flex-shrink-0 bg-green-50 dark:bg-green-900/20 border-b-2 border-green-500 px-6 py-3 animate-fadeIn">
+                    <div className="flex items-center justify-between max-w-5xl mx-auto">
+                        <div className="flex items-center gap-3">
+                            <svg className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" fill="none"
+                                 stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span
+                                className="text-sm font-medium text-green-800 dark:text-green-200">{successMessage}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setSuccessMessage(null)}
+                                className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

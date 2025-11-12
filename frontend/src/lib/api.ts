@@ -165,6 +165,15 @@ export const getChatHistory = async () => {
     }
 };
 
+export const deleteChatHistory = async () => {
+    try {
+        const response = await api.delete('/api/chat/history');
+        return response.data;
+    } catch (error) {
+        handleApiError(error, 'Failed to delete chat history. Please try again.');
+    }
+};
+
 // Utility APIs
 export const getCountries = async () => {
     try {

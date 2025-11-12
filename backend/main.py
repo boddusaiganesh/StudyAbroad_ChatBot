@@ -452,6 +452,42 @@ async def delete_chat_history(
         )
 
 
+@app.delete("/api/chat/history")
+async def delete_all_chat_history(
+        current_user: models.User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    """Delete all chat history for the current user"""
+    try:
+        deleted_count = db.query(models.ChatHistory).filter(
+            models.ChatHistory.user_id == current_user.id
+        ).delete()
+
+        try:
+            db.commit()
+            logger.info(f"Deleted {deleted_count} chat history items for user {current_user.email}")
+            return {
+                "message": "All chat history deleted successfully",
+                "deleted_count": deleted_count
+            }
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Failed to delete all chat history: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to delete chat history"
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error deleting all chat history: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while deleting chat history"
+        )
+
+
 if __name__ == "__main__":
     import uvicorn
 
