@@ -516,7 +516,7 @@ const ChatInterface: React.FC = () => {
                             Welcome to Your Study Abroad Assistant!
                         </h2>
                         <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-2xl">
-                            Ask me anything about studying in USA, UK, Canada, or Australia. I'm here to help with
+                            Ask me anything about studying in USA, UK, Canada, or Australia. I&apos;m here to help with
                             visas, costs,
                             universities, and more!
                         </p>
