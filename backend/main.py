@@ -17,7 +17,7 @@ from auth import (
     create_access_token,
     get_current_user
 )
-from ai_service import get_ai_service
+from ai_service_unified import get_unified_ai_service
 from config import get_settings
 
 # Configure logging
@@ -302,7 +302,7 @@ async def chat(
 
         # Generate answer
         try:
-            ai_service = get_ai_service()
+            ai_service = get_unified_ai_service()
             answer = ai_service.generate_answer(
                 question=chat_request.question.strip(),
                 country=chat_request.country
